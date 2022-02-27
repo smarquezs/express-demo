@@ -1,38 +1,25 @@
-const mongoose = require('mongoose');
+require('./db');
 
-mongoose.connect('mongodb://localhost/playground')
-  .then(() => console.log('Connected to MongoDD'))
-  .catch(error => console.log('Error connecting to MongoDD', error));
+const Course = require('./models/courses');
 
+const getCourses = async(sortBy) => {
+  const courses = await Course.find({ isPublished: true })
+    .sort(sortBy)
+    .select({ name: 1, author: 1})
 
-const courseSchema = mongoose.Schema({
-  name: String,
-  author: String,
-  tags: [String],
-  data: { type: Date, default: Date.now },
-  isPublished: Boolean
-});
+  console.log(courses.map(el => [el._doc.name, el._doc.author]));
+}
 
-const Course = mongoose.model('Course', courseSchema);
-
-const saveCourse = async () => {
-  const course = new Course({
-    name: 'React course',
-    author: 'Sergio',
-    tags: ['react', 'front'],
-    isPublished: true
+const updateCourses = async() => {
+  const result = await Course.update({ isPublished: false }, {
+    $set: { isPublished: true }
   });
 
-  const result  = await course.save();
   console.log(result);
 }
 
-const getCourses = async () => {
-  const courses = await Course.find().
-    select({ name: 1 });
-  console.log(courses);
-}
+getCourses({ name: 1 })
+getCourses({ price: -1 })
+updateCourses();
 
-getCourses();
-// saveCourse();
 
