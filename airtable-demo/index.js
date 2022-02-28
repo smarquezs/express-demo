@@ -1,17 +1,19 @@
-const Airtable = require('airtable');
-const { API_KEY, BASE_ID, TABLE } = process.env;
+const express = require('express');
+const airtable = require('./airtable');
 
-const base = new Airtable({apiKey: API_KEY}).base(BASE_ID);
+const app = express();
 
-base(TABLE).select({
-  pageSize: 3
-}).eachPage((records, fetchNextPage) => {
-  records.forEach(function(record) {
-    console.log(record.id);
-    console.log(record.fields);
-  });
+const port = process.env.PORT || 4000
 
-  fetchNextPage();
-}, (err) =>  {
-  if (err) { console.error(err); return; }
-});
+app.use(express.json())
+
+app.get('/', async(_req, res) => {
+  try {
+    const allRecords = await airtable.getAllRecords();
+    res.status(200).json(allRecords);
+  } catch(error) {
+    res.status(200).json({ message: error.message });
+  }
+})
+
+app.listen(port, () => console.log(`visit http://localhost:${port}`))
