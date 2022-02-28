@@ -9,8 +9,12 @@ app.use(express.json())
 
 app.get('/', async(_req, res) => {
   try {
-    const allRecords = await airtable.getAllRecords();
-    res.status(200).json(allRecords);
+    const data = await airtable.getAllRecords()
+    const records = data
+      .map(record => {
+        return { id: record.id, ...record.fields }
+      });
+    res.status(200).json(records);
   } catch(error) {
     res.status(200).json({ message: error.message });
   }
